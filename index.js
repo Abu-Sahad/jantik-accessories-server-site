@@ -18,10 +18,15 @@ async function run() {
     try {
         await client.connect();
         const itemsCollection = client.db('jantik_accessories').collection('items')
-        console.log('database connected')
+        //console.log('database connected')
 
 
-
+        app.get('/item', async (req, res) => {
+            const query = {};
+            const cursor = itemsCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
 
 
     }
