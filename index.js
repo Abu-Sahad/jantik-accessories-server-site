@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-
+const jwt=require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config();
@@ -23,8 +23,8 @@ async function run() {
         const itemOrderCollection = client.db('jantik_accessories').collection('orders')
 
         const reviewCollection = client.db('jantik_accessories').collection('reviews')
-        
-        
+
+
         const userCollection = client.db('de_walt').collection('users');
 
 
@@ -44,20 +44,8 @@ async function run() {
             res.send(result)
         })
 
-
-
-
-
-
-
-
         app.post('/order', async (req, res) => {
             const order = req.body
-            //  const query = {userEmail:order.userEmail,userName:order.userName,phone:order.phone,address:order.address}
-            //  const exist = await orderCollection.findOne(query)
-            //  if(exist){
-            //   return res.send({ success: false, order: exist })
-            //  }
             const result = await itemOrderCollection.insertOne(order)
             res.send({ success: true, result })
         })
