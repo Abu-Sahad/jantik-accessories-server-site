@@ -22,6 +22,8 @@ async function run() {
 
         const itemOrderCollection = client.db('jantik_accessories').collection('orders')
 
+        const reviewCollection = client.db('jantik_accessories').collection('reviews')
+
         // all item 
         app.get('/item', async (req, res) => {
             const query = {};
@@ -64,6 +66,24 @@ async function run() {
             res.send(order)
             console.log(email, order)
         })
+
+
+
+
+        //review area
+        app.get('/review' , async(req,res)=>{
+            const query = {}
+            const cursor= reviewCollection.find(query)
+            const reviews = await cursor.toArray()
+            res.send(reviews)
+        })
+
+
+        app.post('/review' , async(req,res)=>{
+            const review = req.body
+            const result = await reviewCollection.insertOne(review)
+            res.send({success:true,result})
+          })
 
     }
     finally {
