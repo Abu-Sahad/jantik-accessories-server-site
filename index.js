@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -20,21 +20,50 @@ async function run() {
         const itemsCollection = client.db('jantik_accessories').collection('items')
         //console.log('database connected')
 
-     // all item 
+        const itemOrderCollection = client.db('jantik_accessories').collection('orders')
+
+        // all item 
         app.get('/item', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
             const items = await cursor.toArray();
             res.send(items);
         })
-      
+
         // single item
-        app.get('/item/:_id', async(req,res)=>{
+        app.get('/item/:_id', async (req, res) => {
             const id = req.params._id
-            const query = {_id:ObjectId(id)}
-            const result = await toolCollection.findOne(query)
+            const query = { _id: ObjectId(id) }
+            const result = await itemsCollection.findOne(query)
             res.send(result)
-          })
+        })
+
+
+
+
+
+
+
+
+        app.post('/order', async (req, res) => {
+            const order = req.body
+            //  const query = {userEmail:order.userEmail,userName:order.userName,phone:order.phone,address:order.address}
+            //  const exist = await orderCollection.findOne(query)
+            //  if(exist){
+            //   return res.send({ success: false, order: exist })
+            //  }
+            const result = await itemOrderCollection.insertOne(order)
+            res.send({ success: true, result })
+        })
+
+        app.get('/order', async (req, res) => {
+            const email = req.query.email
+            const query = { userEmail: email }
+            const cursor = itemOrderCollection.find(query)
+            const order = await cursor.toArray()
+            res.send(order)
+            console.log(email, order)
+        })
 
     }
     finally {
