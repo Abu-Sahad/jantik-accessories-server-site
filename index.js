@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const jwt=require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config();
@@ -19,13 +19,10 @@ async function run() {
         await client.connect();
         const itemsCollection = client.db('jantik_accessories').collection('items')
         //console.log('database connected')
-
         const itemOrderCollection = client.db('jantik_accessories').collection('orders')
-
         const reviewCollection = client.db('jantik_accessories').collection('reviews')
-
-
-        const userCollection = client.db('de_walt').collection('users');
+        const userCollection = client.db('jantik_accessories').collection('users');
+        const profileUpdate = client.db('jantik_accessories').collection('profile')
 
 
         // all item 
@@ -43,13 +40,14 @@ async function run() {
             const result = await itemsCollection.findOne(query)
             res.send(result)
         })
-
+         
+        //order create
         app.post('/order', async (req, res) => {
             const order = req.body
             const result = await itemOrderCollection.insertOne(order)
             res.send({ success: true, result })
         })
-
+         //single order 
         app.get('/order', async (req, res) => {
             const email = req.query.email
             const query = { userEmail: email }
@@ -58,7 +56,12 @@ async function run() {
             res.send(order)
             console.log(email, order)
         })
-
+        //add product
+        app.post("/item", async (req, res) => {
+            const items = req.body;
+            const result = await itemsCollection.insertOne(items);
+            res.send(result);
+        });
 
 
 
@@ -71,25 +74,7 @@ async function run() {
         })
 
 
-        app.post('/review', async (req, res) => {
-            const review = req.body
-            const result = await reviewCollection.insertOne(review)
-            res.send({ success: true, result })
-        })
-
-
-        app.put('/user/:email', async (req, res) => {
-            const email = req.params.email;
-            const user = req.body;
-            const filter = { email: email };
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: user,
-            };
-            const result = await userCollection.updateOne(filter, updateDoc, options);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' })
-            res.send({ result, token });
-        });
+        
 
     }
     finally {
