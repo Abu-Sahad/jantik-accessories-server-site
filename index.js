@@ -23,6 +23,10 @@ async function run() {
         const itemOrderCollection = client.db('jantik_accessories').collection('orders')
 
         const reviewCollection = client.db('jantik_accessories').collection('reviews')
+        
+        
+        const userCollection = client.db('de_walt').collection('users');
+
 
         // all item 
         app.get('/item', async (req, res) => {
@@ -70,20 +74,34 @@ async function run() {
 
 
 
-        //review area
-        app.get('/review' , async(req,res)=>{
+        //review area api
+        app.get('/review', async (req, res) => {
             const query = {}
-            const cursor= reviewCollection.find(query)
+            const cursor = reviewCollection.find(query)
             const reviews = await cursor.toArray()
             res.send(reviews)
         })
 
 
-        app.post('/review' , async(req,res)=>{
+        app.post('/review', async (req, res) => {
             const review = req.body
             const result = await reviewCollection.insertOne(review)
-            res.send({success:true,result})
-          })
+            res.send({ success: true, result })
+        })
+
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' })
+            res.send({ result, token });
+        });
 
     }
     finally {
