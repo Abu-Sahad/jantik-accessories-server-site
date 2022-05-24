@@ -20,14 +20,21 @@ async function run() {
         const itemsCollection = client.db('jantik_accessories').collection('items')
         //console.log('database connected')
 
-
+     // all item 
         app.get('/item', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
             const items = await cursor.toArray();
             res.send(items);
         })
-
+      
+        // single item
+        app.get('/item/:_id', async(req,res)=>{
+            const id = req.params._id
+            const query = {_id:ObjectId(id)}
+            const result = await toolCollection.findOne(query)
+            res.send(result)
+          })
 
     }
     finally {
