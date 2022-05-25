@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config();
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -23,6 +27,7 @@ async function run() {
         const reviewCollection = client.db('jantik_accessories').collection('reviews')
         const userCollection = client.db('jantik_accessories').collection('users');
         const profileUpdate = client.db('jantik_accessories').collection('profile')
+        const paymentCollection = client.db('jantik_accessories').collection('payments')
 
 
         // all item 
@@ -56,23 +61,71 @@ async function run() {
         // })
 
 
+        //payment
+        app.post('/create-payment-intent', async (req, res) => {
+            const order = req.body;
+            const price = order.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        });
+
+
 
         //single order 
-        app.get('/order', async (req, res) => {
-            const email = req.query.email
-            const query = { userEmail: email }
-            const cursor = itemOrderCollection.find(query)
-            const order = await cursor.toArray()
-            res.send(order)
-        })
+        // app.get('/order', async (req, res) => {
+        //     const email = req.query.email
+        //     const query = { userEmail: email }
+        //     const cursor = itemOrderCollection.find(query)
+        //     const order = await cursor.toArray()
+        //     res.send(order)
+        // })
 
 
-        app.get('/order/:id',async(req,res)=>{
-            const id=req.params.id;
-            const query={_id:ObjectId(id)};
-            const order=await itemOrderCollection.findOne(query);
-            res.send(order)
+        // app.get('/order/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: ObjectId(id) };
+        //     const order = await itemOrderCollection.findOne(query);
+        //     res.send(order)
+        // })
+
+        app.get("/order", async (req, res) => {
+            const email = req.query.email;
+            if (email !== undefined) {
+              console.log('GG')
+                const query = { userEmail: email };
+                const cursor = itemOrderCollection.find(query);
+                const products = await cursor.toArray();
+                res.send(products);
+            }
+            else {
+                const query = {};
+                const cursor = itemOrderCollection.find(query);
+                const products = await cursor.toArray();
+                res.send(products);
+            }
         })
+
+        app.patch('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const result = await paymentCollection.insertOne(payment);
+            const updatedBooking = await itemOrderCollection.updateOne(filter, updatedDoc);
+
+            res.send(updatedDoc)
+        })
+
 
 
 
