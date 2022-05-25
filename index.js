@@ -65,13 +65,26 @@ async function run() {
             const order = await cursor.toArray()
             res.send(order)
         })
+
+
+        app.get('/order/:id',async(req,res)=>{
+            const id=req.params.id;
+            const query={_id:ObjectId(id)};
+            const order=await itemOrderCollection.findOne(query);
+            res.send(order)
+        })
+
+
+
+
+
+
         //add product
         app.post("/item", async (req, res) => {
             const items = req.body;
             const result = await itemsCollection.insertOne(items);
             res.send(result);
         });
-
 
 
         //review area api
