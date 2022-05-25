@@ -40,21 +40,30 @@ async function run() {
             const result = await itemsCollection.findOne(query)
             res.send(result)
         })
-         
+
         //order create
         app.post('/order', async (req, res) => {
             const order = req.body
             const result = await itemOrderCollection.insertOne(order)
             res.send({ success: true, result })
         })
-         //single order 
+
+        // app.get('/order', async (req, res) => {
+        //     const query = {};
+        //     const cursor = itemOrderCollection.find(query);
+        //     const items = await cursor.toArray();
+        //     res.send(items);
+        // })
+
+
+
+        //single order 
         app.get('/order', async (req, res) => {
             const email = req.query.email
             const query = { userEmail: email }
             const cursor = itemOrderCollection.find(query)
             const order = await cursor.toArray()
             res.send(order)
-            console.log(email, order)
         })
         //add product
         app.post("/item", async (req, res) => {
@@ -74,7 +83,65 @@ async function run() {
         })
 
 
-        
+        app.post('/review', async (req, res) => {
+            const review = req.body
+            const result = await reviewCollection.insertOne(review)
+            res.send({ success: true, result })
+        })
+
+        app.get('/user', async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
+        });
+
+        app.put('/user/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        app.delete("/user/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const result = await userCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        //getting api for admin
+
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin })
+        })
+
+
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' })
+            res.send({ result, token });
+        });
+
+
+
+        app.post('/profile', async (req, res) => {
+            const profile = req.body
+            const result = await profileUpdate.insertOne(profile)
+            res.send({ success: true, result })
+        })
 
     }
     finally {
