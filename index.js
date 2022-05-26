@@ -46,6 +46,14 @@ async function run() {
             res.send(result)
         })
 
+        app.delete("/item/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await itemsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+
         //order create
         app.post('/order', async (req, res) => {
             const order = req.body
@@ -176,6 +184,7 @@ async function run() {
             const result = await userCollection.deleteOne(filter);
             res.send(result);
         });
+
 
         //getting api for admin
 
