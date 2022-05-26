@@ -1,7 +1,6 @@
 {
   "name": "jantik-accessories-server",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -18,5 +17,15 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.6.0",
     "stripe": "^9.4.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Abu-Sahad.git"
+  },
+  "bugs": {
+    "url": "https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Abu-Sahad/issues"
+  },
+  "homepage": "https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Abu-Sahad#readme",
+  "description": ""
 }

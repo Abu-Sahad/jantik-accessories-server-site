@@ -96,7 +96,7 @@ async function run() {
         app.get("/order", async (req, res) => {
             const email = req.query.email;
             if (email !== undefined) {
-              console.log('GG')
+                console.log('qq')
                 const query = { userEmail: email };
                 const cursor = itemOrderCollection.find(query);
                 const products = await cursor.toArray();
